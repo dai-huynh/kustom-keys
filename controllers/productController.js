@@ -1,40 +1,16 @@
+require("dotenv/config");
+
 const { body, validationResult } = require("express-validator");
 const async = require("async");
 const fs = require("fs");
+
+const { upload } = require("../utils/multer");
+const { cloudinary } = require("../utils/cloudinary");
 
 const Product = require("../models/product");
 const ProductInstance = require("../models/productinstance");
 const Brand = require("../models/brand");
 const Category = require("../models/category");
-
-// multer setup
-const multer = require("multer");
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./public/uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + "-" + file.originalname);
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  if (
-    file.mimetype === "image/jpeg" ||
-    file.mimetype === "image/jpg" ||
-    file.mimetype === "image/png"
-  ) {
-    cb(null, true);
-  } else {
-    cb(new Error("File format should be JPEG, JPG, PNG"), false);
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 1024 * 1024 * 10 },
-  fileFilter: fileFilter,
-});
 
 exports.index = (req, res) => {
   async.parallel(
@@ -66,7 +42,7 @@ exports.index = (req, res) => {
 
 exports.product_list = (req, res, next) => {
   Product.find()
-    .select("name price product_image")
+    .select("name price image_key")
     .sort({ price: "desc" })
     .exec((err, list_products) => {
       if (err) return next(err);
@@ -90,13 +66,24 @@ exports.product_detail = (req, res, next) => {
         ProductInstance.find({ product: req.params.id }).exec(callback);
       },
     },
-    (err, results) => {
+    async (err, results) => {
       if (err) return next(err);
       if (results.product == null) {
         const err = new Error("Product not found");
         err.status = 404;
         return next(err);
       }
+      await results.product.getUrl();
+      // if (results.product.image_key) {
+      //   await cloudinary.api.resource(
+      //     results.product.image_key,
+      //     (err, result) => {
+      //       if (err) return next(err);
+      //       results.product.image = result.url;
+      //     }
+      //   );
+      // }
+
       res.render("product_detail", {
         product: results.product,
         product_instances: results.product_instances,
@@ -131,7 +118,8 @@ exports.product_create_get = (req, res, next) => {
 };
 
 exports.product_create_post = [
-  upload.single("product_image"),
+  // refers to file input with name "image"
+  upload.single("image"),
 
   body("name", "Name must not be empty.").trim().isLength({ min: 1 }).escape(),
   body("price")
@@ -147,13 +135,8 @@ exports.product_create_post = [
   body("brand.*", "Brand must not be empty.").escape(),
   body("category.*").escape(),
 
-  (req, res, next) => {
+  async (req, res, next) => {
     const errors = validationResult(req);
-
-    let filePath = "";
-    if (req.file) {
-      filePath = req.file.path;
-    }
 
     const product = new Product({
       brand: req.body.brand,
@@ -161,14 +144,24 @@ exports.product_create_post = [
       price: req.body.price,
       name: req.body.name,
       details: req.body.details,
-      product_image: filePath,
+      image_key: "",
     });
+    await product.uploadImage(req.file);
+    // if (req.file) {
+    //   await cloudinary.uploader.upload(req.file.path, (err, result) => {
+    //     if (err) return next(err);
+    //     product.image_key = result.public_id;
+    //   });
+    // }
 
     if (!errors.isEmpty()) {
-      if (product.product_image) {
-        fs.unlink(req.file.path, (err) => console.log(err));
-        console.log(`Deleted ${req.file.filename} from uploads`);
-      }
+      await product.removeImage();
+      // if (req.file) {
+      //   cloudinary.uploader.destroy(product.image_key, (err) => {
+      //     if (err) return next(err);
+      //     console.log("Deleted image " + product.image_key);
+      //   });
+      // }
       async.parallel(
         {
           brands(callback) {
@@ -190,7 +183,7 @@ exports.product_create_post = [
               brand.selected = "selected";
             }
           }
-          // Prevent undefined error
+          // Category is optional, so check if it exists to avoid error
           if (product.category) {
             for (const category of results.categories) {
               if (category._id.toString() === product.category.toString()) {
@@ -210,7 +203,6 @@ exports.product_create_post = [
       );
       return;
     }
-
     product.save((err) => {
       if (err) return next(err);
       res.redirect(product.url);
@@ -254,7 +246,7 @@ exports.product_delete_post = (req, res, next) => {
           .exec(callback);
       },
     },
-    (err, results) => {
+    async (err, results) => {
       if (err) return next(err);
       if (results.product_instances.length > 0) {
         res.render("product_delete", {
@@ -264,9 +256,15 @@ exports.product_delete_post = (req, res, next) => {
         });
         return;
       }
+      // product likely already has key
+      await results.product.removeImage();
 
-      fs.unlink(results.product.product_image, (err) => console.log(err));
-      console.log(`Deleted ${results.product.product_image} from uploads`);
+      // if (req.file) {
+      //   cloudinary.uploader.destroy(product.image_key, (err) => {
+      //     if (err) return next(err);
+      //     console.log("Deleted image " + product.image_key);
+      //   });
+      // }
 
       Product.findByIdAndRemove(req.body.productid, (err) => {
         if (err) return next(err);
@@ -308,13 +306,16 @@ exports.product_update_get = (req, res, next) => {
           brand.selected = "selected";
         }
       }
-      for (const category of results.categories) {
-        if (
-          category._id.toString() === results.product.category._id.toString()
-        ) {
-          category.checked = "true";
+      if (results.product.category) {
+        for (const category of results.categories) {
+          if (
+            category._id.toString() === results.product.category._id.toString()
+          ) {
+            category.checked = "true";
+          }
         }
       }
+
       res.render("product_form", {
         title: "Update Product",
         product: results.product,
@@ -326,7 +327,7 @@ exports.product_update_get = (req, res, next) => {
 };
 
 exports.product_update_post = [
-  upload.single("product_image"),
+  upload.single("image"),
 
   body("name", "Name must not be empty.").trim().isLength({ min: 1 }).escape(),
   body("price", "Price must be greater than $0.00")
@@ -342,13 +343,8 @@ exports.product_update_post = [
     .escape(),
   body("category.*").escape(),
 
-  (req, res, next) => {
+  async (req, res, next) => {
     const errors = validationResult(req);
-
-    let filePath = null;
-    if (req.file) {
-      filePath = req.file.path;
-    }
 
     const product = new Product({
       brand: req.body.brand,
@@ -356,15 +352,22 @@ exports.product_update_post = [
       price: req.body.price,
       name: req.body.name,
       details: req.body.details,
-      product_image: filePath,
+      image_key: "",
       _id: req.params.id,
     });
 
+    await product.uploadImage(req.file);
+    // if (req.file) {
+    //   product.image_key = await cloudinary.uploader.upload(req.file.path)
+    //     .public_id;
+    // }
+
     if (!errors.isEmpty()) {
-      if (req.file) {
-        fs.unlink(req.file.path, (err) => console.log(err));
-        console.log(`Deleted ${req.file.filename} from uploads`);
-      }
+      await product.removeImage();
+      // if (product.image_key) {
+      //   cloudinary.uploader.destroy(product.image_key);
+      //   console.log("Deleted image " + product.image_key);
+      // }
       async.parallel(
         {
           brands(callback) {
@@ -386,11 +389,11 @@ exports.product_update_post = [
               brand.selected = "selected";
             }
           }
-          for (const category of results.categories) {
-            if (
-              category._id.toString() === results.product.category.toString()
-            ) {
-              category.checked = "true";
+          if (product.category) {
+            for (const category of results.categories) {
+              if (category._id.toString() === product.category.toString()) {
+                category.checked = "true";
+              }
             }
           }
 

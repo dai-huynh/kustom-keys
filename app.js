@@ -1,3 +1,4 @@
+require("dotenv/config");
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
@@ -5,7 +6,6 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const compression = require("compression");
 const helmet = require("helmet");
-require("dotenv/config");
 
 // connect to mongodb
 const mongoose = require("mongoose");
@@ -32,6 +32,14 @@ app.set("views", [
 app.set("view engine", "pug");
 
 app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    useDefaults: true,
+    directives: {
+      "img-src": ["'self'", "https: data:"],
+    },
+  })
+);
 app.use(logger("dev"));
 app.use(compression());
 app.use(express.json());

@@ -3,8 +3,9 @@ extends ../layout
 block content
   h1 Product: #{ product.name }: #{ product.price }
 
-  if (product.product_image)
-    img(src=product.image)
+  if (product.image_key)
+    - console.log(product.image);
+    img(crossorigin="anonymous", src=product.image)
 
   p By:
     a(href=product.brand.url) #{ product.brand.name }

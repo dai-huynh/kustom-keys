@@ -6,7 +6,7 @@ block content
   each product in product_list
     li
       a(href=product.url) #{ product.name }
-      if (product.product_image)
+      if (product.image_key)
         img(src=product.image)
 
   a(href="/product/create")

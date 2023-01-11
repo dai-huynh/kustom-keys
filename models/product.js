@@ -1,3 +1,4 @@
+const { cloudinary } = require("../utils/cloudinary");
 const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
@@ -8,19 +9,44 @@ const ProductSchema = new Schema({
   price: { type: Schema.Types.Decimal128, required: true },
   name: { type: String, maxLength: 100, required: true },
   details: { type: String, required: true },
-  product_image: String,
+  image_key: String,
 });
 
 ProductSchema.virtual("price_formatted").get(function () {
   return "$" + this.price;
 });
 
-ProductSchema.virtual("image").get(function () {
-  return this.product_image.replace("public/uploads/", "/");
-});
-
 ProductSchema.virtual("url").get(function () {
   return `/product/${this._id}`;
 });
+
+ProductSchema.methods.getUrl = async function () {
+  if (this.image_key) {
+    await cloudinary.api.resource(this.image_key, (err, result) => {
+      if (err) return next(err);
+      this.image = result.url;
+      console.log(this.image);
+    });
+  }
+};
+
+ProductSchema.methods.uploadImage = async function (imageFile) {
+  if (imageFile) {
+    await cloudinary.uploader.upload(imageFile.path, (err, result) => {
+      if (err) return next(err);
+      this.image_key = result.public_id;
+      console.log("Uploaded image " + this.image_key);
+    });
+  }
+};
+
+ProductSchema.methods.removeImage = async function () {
+  if (this.image_key) {
+    cloudinary.uploader.destroy(this.image_key, (err) => {
+      if (err) return next(err);
+      console.log("Deleted image " + this.image_key);
+    });
+  }
+};
 
 module.exports = mongoose.model("Product", ProductSchema);
