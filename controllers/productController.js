@@ -190,9 +190,12 @@ exports.product_create_post = [
               brand.selected = "selected";
             }
           }
-          for (const category of results.categories) {
-            if (category._id.toString() === product.category.toString()) {
-              category.checked = "true";
+          // Prevent undefined error
+          if (product.category) {
+            for (const category of results.categories) {
+              if (category._id.toString() === product.category.toString()) {
+                category.checked = "true";
+              }
             }
           }
 
@@ -261,6 +264,10 @@ exports.product_delete_post = (req, res, next) => {
         });
         return;
       }
+
+      fs.unlink(results.product.product_image, (err) => console.log(err));
+      console.log(`Deleted ${results.product.product_image} from uploads`);
+
       Product.findByIdAndRemove(req.body.productid, (err) => {
         if (err) return next(err);
         res.redirect("/products");
