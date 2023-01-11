@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+  h1 Brand: #{ brand.name }
+
+  if (brand_products.length)
+    h2 Products:
+
+    ul
+      each product in brand_products
+        li
+          h4
+            a(href=product.url) #{ product.name }: #{ product.price }
+  else
+    p No products
+
+  a(href="/product/create")
+    button Create Product
+  a(href=brand.url + "/delete")
+    button Delete
+  a(href=brand.url + "/update")
+    button Update

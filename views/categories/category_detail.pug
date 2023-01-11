@@ -1,0 +1,18 @@
+extends ../layout
+
+block content
+  h1 Category: #{ category.name }
+
+  h2 Products:
+  ul
+    each product in category_products
+      li
+        h4
+          a(href=product.url) #{ product.name }: #{ product.price }
+
+  a(href="/category/create")
+    button Create Category
+  a(href=category.url + "/delete")
+    button Delete
+  a(href=category.url + "/update")
+    button Update

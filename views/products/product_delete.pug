@@ -1,0 +1,30 @@
+extends ../layout
+
+block content
+  h1 #{ title }:
+    |
+    a(href=product.url) #{ product.name }
+
+  if product_instances.length
+    p #[strong Delete the following product instances before attempting to delete this product.]
+
+    div(style="margin-left: 20px; margin-top: 20px")
+      h4 Product Instances
+
+      ul
+        each instance in product_instances
+          - console.log(instance);
+          li
+            a(href=instance.url) #{ `${product.name} (${instance.model}): $${instance.price}` } - #{ instance.condition }
+  else
+    p Do you really want to delete this product?
+
+    form(method="POST", action="")
+      .form-group
+        input#productid.form-control(
+          type="hidden",
+          name="productid",
+          required="true",
+          value=product._id
+        )
+      button.btn.btn-primary(type="submit") Delete

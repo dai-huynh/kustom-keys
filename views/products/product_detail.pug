@@ -1,0 +1,43 @@
+extends ../layout
+
+block content
+  h1 Product: #{ product.name }: #{ product.price }
+
+  if (product.product_image)
+    img(src=product.image)
+
+  p By:
+    a(href=product.brand.url) #{ product.brand.name }
+  p Category:
+    if (!product.category)
+      p no category
+    else
+      a(href=product.category.url) #{ product.category.name }
+
+  p= product.details
+
+  ul
+    each instance in product_instances
+      li
+        h4
+          a(href=instance.url) #{ product.name }: #{ instance.condition }
+        p Model Number: #{ instance.model }
+
+        if (!instance.description)
+          p No Description
+        else
+          p #{ instance.description }
+
+        a(href=instance.url)
+          button Buy Now
+    else
+      p No Stock Available
+
+  a(href="/product/create")
+    button Create Product
+  a(href=product.url + "/delete")
+    button Delete
+  a(href=product.url + "/update")
+    button Update
+  a(href=`/productinstance/${product._id}/create`)
+    button Create Product Instance

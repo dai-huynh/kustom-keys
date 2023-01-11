@@ -1,0 +1,18 @@
+extends ../layout
+
+block content
+  h1 #{ title }:
+    |
+    a(href=productinstance.product.url) #{ productinstance.product.name }
+
+  h2 Do you really want to delete:
+  h2 #{ productinstance.product.name } | Model No. #{ productinstance.model }?
+  form(method="POST", action="")
+    .form-group
+      input#productinstanceid.form-control(
+        type="hidden",
+        name="productinstanceid",
+        required="true",
+        value=productinstance._id
+      )
+    button.btn.btn-primary(type="submit") Delete

@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+  h1= title
+  ul
+  each product in product_list
+    li
+      a(href=product.url) #{ product.name }
+      if (product.product_image)
+        img(src=product.image)
+
+  a(href="/product/create")
+    button Create Product
+  if (product_list.length > 0)
+    a(href="/productinstance/1/create")
+      button Create Product Instance

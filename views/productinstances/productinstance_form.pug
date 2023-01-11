@@ -1,0 +1,61 @@
+extends ../layout
+
+block content
+  h1= title
+
+  if (product)
+    h2= product.name
+
+  form(method="POST", action="")
+    if (product_list)
+      .form-group
+        label(for="product") Product:
+        select#products.form-control(
+          placeholder="Select product",
+          name="product",
+          required="true"
+        )
+          each product in product_list
+            option(value=product._id, selected=product.selected) #{ product.name }
+    else
+      .form-group
+        label(for="product") Product:
+        select#products.form-control(required="true", disabled)
+          option(value=product._id) #{ product.name }
+        input(type="hidden", name="product", value=product._id)
+
+    .form-group
+      label(for="model") Model:
+      input#model.form-control(
+        type="text",
+        name="model",
+        value=undefined === productinstance ? "" : productinstance.model.toString(),
+        required="true"
+      )
+    .form-group
+      label(for="condition") Condition:
+      select#condition.form-control(
+        placeholder="Select condition",
+        name="condition",
+        required="true"
+      )
+        each condition in ["New", "Used - Like New", "Used - Some Damage", "Used - Poor Condition"]
+          option(value=condition) #{ condition }
+    .form-group
+      label(for="price") Price: $
+      input#price.form-control(
+        type="number",
+        name="price",
+        step="0.01",
+        value=undefined === productinstance ? "" : productinstance.price.toString(),
+        required="true"
+      )
+    .form-group
+      label(for="description") Description:
+      textarea#details.form-control(type="textarea", name="description") #{ undefined === productinstance ? "" : productinstance.description }
+    button.btn.btn-primary(type="submit") Submit
+
+  if errors
+    ul
+      each error in errors
+        li!= error.msg
