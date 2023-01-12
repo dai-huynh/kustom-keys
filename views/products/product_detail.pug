@@ -4,7 +4,6 @@ block content
   h1 Product: #{ product.name }: #{ product.price }
 
   if (product.image_key)
-    - console.log(product.image);
     img(crossorigin="anonymous", src=product.image)
 
   p By:

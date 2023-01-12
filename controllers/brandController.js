@@ -26,13 +26,18 @@ exports.brand_detail = (req, res, next) => {
         Product.find({ brand: req.params.id }).exec(callback);
       },
     },
-    (err, results) => {
+    async (err, results) => {
       if (err) return next(err);
       if (results.brand == null) {
         const err = new Error("Brand not found");
         err.status = 404;
         return next(err);
       }
+
+      for (const product of results.brand_products) {
+        await product.getUrl();
+      }
+
       res.render("brand_detail", {
         brand: results.brand,
         brand_products: results.brand_products,
@@ -84,9 +89,10 @@ exports.brand_delete_get = (req, res, next) => {
         Product.find({ brand: req.params.id }).exec(callback);
       },
     },
-    (err, results) => {
+    async (err, results) => {
       if (err) return next(err);
       if (results.brand == null) res.redirect("/brands");
+
       res.render("brand_delete", {
         title: "Delete Brand",
         brand: results.brand,

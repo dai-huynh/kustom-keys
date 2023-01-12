@@ -26,13 +26,18 @@ exports.category_detail = (req, res, next) => {
         Product.find({ category: req.params.id }).exec(callback);
       },
     },
-    (err, results) => {
+    async (err, results) => {
       if (err) return next(err);
       if (results.category == null) {
         const err = new Error("Category not found");
         err.status = 404;
         return next(err);
       }
+
+      for (const product of results.category_products) {
+        await product.getUrl();
+      }
+
       res.render("category_detail", {
         category: results.category,
         category_products: results.category_products,

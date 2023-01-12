@@ -4,30 +4,32 @@ block content
   h1= title
   h2 Newest Arrivals
   ul
-    each product in new_products
+    each product in products
       li
         a(href=product.url) #{ product.name }
         | #{ product.price_formatted }
+        if (product.image_key)
+          img(crossorigin="anonymous", src=product.image)
 
-  h1 Keyboards
-  each product in products
-    //- Prevents undefined
-    if (product.category != null)
-      if (product.category.name == "Keyboards")
-        li
-          a(href=product.url) #{ product.name }
-  h1 Keycaps
-  each product in products
-    if (product.category != null)
-      if (product.category.name == "Keycaps")
-        li
-          a(href=product.url) #{ product.name }
-  h1 Switches
-  each product in products
-    if (product.category != null)
-      if (product.category.name == "Switches")
-        li
-          a(href=product.url) #{ product.name }
+  //- h1 Keyboards
+  //- each product in products
+  //-   //- Prevents undefined
+  //-   if (product.category != null)
+  //-     if (product.category.name == "Keyboards")
+  //-       li
+  //-         a(href=product.url) #{ product.name }
+  //- h1 Keycaps
+  //- each product in products
+  //-   if (product.category != null)
+  //-     if (product.category.name == "Keycaps")
+  //-       li
+  //-         a(href=product.url) #{ product.name }
+  //- h1 Switches
+  //- each product in products
+  //-   if (product.category != null)
+  //-     if (product.category.name == "Switches")
+  //-       li
+  //-         a(href=product.url) #{ product.name }
 
   a(href="/product/create")
     button Create Product

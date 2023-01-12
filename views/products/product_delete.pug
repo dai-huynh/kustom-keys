@@ -13,11 +13,13 @@ block content
 
       ul
         each instance in product_instances
-          - console.log(instance);
           li
             a(href=instance.url) #{ `${product.name} (${instance.model}): $${instance.price}` } - #{ instance.condition }
   else
     p Do you really want to delete this product?
+
+    if (product.image_key)
+      img(crossorigin="anonymous", src=product.image)
 
     form(method="POST", action="")
       .form-group

@@ -7,7 +7,7 @@ block content
     li
       a(href=product.url) #{ product.name }
       if (product.image_key)
-        img(src=product.image)
+        img(crossorigin="anonymous", src=product.image)
 
   a(href="/product/create")
     button Create Product

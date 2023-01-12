@@ -38,6 +38,7 @@ app.use(
     directives: {
       "img-src": ["'self'", "https: data:"],
     },
+    crossOriginResourcePolicy: false,
   })
 );
 app.use(logger("dev"));

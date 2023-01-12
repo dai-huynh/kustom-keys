@@ -11,7 +11,9 @@ block content
         li
           h4
             a(href=product.url) #{ product.name }: #{ product.price }
-  else
+            if (product.image_key)
+              img(crossorigin="anonymous", src=product.image)
+
     p No products
 
   a(href="/product/create")

@@ -13,39 +13,38 @@ const Brand = require("../models/brand");
 const Category = require("../models/category");
 
 exports.index = (req, res) => {
-  async.parallel(
-    {
-      new_products(callback) {
-        Product.find()
-          .select("name price image")
-          .limit(5)
-          .sort({ $natural: -1 })
-          .exec(callback);
-      },
-      products(callback) {
-        Product.find()
-          .select("name category price image")
-          .populate("category")
-          .exec(callback);
-      },
-    },
-    (err, results) => {
+  Product.find()
+    .select("name category price image_key")
+    .populate("category")
+    .exec(async (err, products) => {
+      if (err) return next(err);
+
+      // maybe nesting async/await functions is bad practice?
+      // causes load time to dramatically increase
+      // refactor later
+      for (const product of products) {
+        await product.getUrl();
+      }
+
       res.render("index", {
         title: "Kustom Keys",
         error: err,
-        new_products: results.new_products,
-        products: results.products,
+        products,
       });
-    }
-  );
+    });
 };
 
 exports.product_list = (req, res, next) => {
   Product.find()
     .select("name price image_key")
     .sort({ price: "desc" })
-    .exec((err, list_products) => {
+    .exec(async (err, list_products) => {
       if (err) return next(err);
+
+      for (const product of list_products) {
+        await product.getUrl();
+      }
+
       res.render("product_list", {
         title: "Product List",
         product_list: list_products,
@@ -73,16 +72,8 @@ exports.product_detail = (req, res, next) => {
         err.status = 404;
         return next(err);
       }
+
       await results.product.getUrl();
-      // if (results.product.image_key) {
-      //   await cloudinary.api.resource(
-      //     results.product.image_key,
-      //     (err, result) => {
-      //       if (err) return next(err);
-      //       results.product.image = result.url;
-      //     }
-      //   );
-      // }
 
       res.render("product_detail", {
         product: results.product,
@@ -146,22 +137,12 @@ exports.product_create_post = [
       details: req.body.details,
       image_key: "",
     });
+
     await product.uploadImage(req.file);
-    // if (req.file) {
-    //   await cloudinary.uploader.upload(req.file.path, (err, result) => {
-    //     if (err) return next(err);
-    //     product.image_key = result.public_id;
-    //   });
-    // }
 
     if (!errors.isEmpty()) {
       await product.removeImage();
-      // if (req.file) {
-      //   cloudinary.uploader.destroy(product.image_key, (err) => {
-      //     if (err) return next(err);
-      //     console.log("Deleted image " + product.image_key);
-      //   });
-      // }
+
       async.parallel(
         {
           brands(callback) {
@@ -222,9 +203,10 @@ exports.product_delete_get = (req, res, next) => {
           .exec(callback);
       },
     },
-    (err, results) => {
+    async (err, results) => {
       if (err) return next(err);
       if (results.product == null) res.redirect("/products");
+      await results.product.getUrl();
       res.render("product_delete", {
         title: "Delete Product",
         product: results.product,
@@ -248,6 +230,7 @@ exports.product_delete_post = (req, res, next) => {
     },
     async (err, results) => {
       if (err) return next(err);
+      await results.product.getUrl();
       if (results.product_instances.length > 0) {
         res.render("product_delete", {
           title: "Delete Product",
@@ -256,15 +239,7 @@ exports.product_delete_post = (req, res, next) => {
         });
         return;
       }
-      // product likely already has key
       await results.product.removeImage();
-
-      // if (req.file) {
-      //   cloudinary.uploader.destroy(product.image_key, (err) => {
-      //     if (err) return next(err);
-      //     console.log("Deleted image " + product.image_key);
-      //   });
-      // }
 
       Product.findByIdAndRemove(req.body.productid, (err) => {
         if (err) return next(err);
@@ -294,13 +269,16 @@ exports.product_update_get = (req, res, next) => {
           .exec(callback);
       },
     },
-    (err, results) => {
+    async (err, results) => {
       if (err) return next(err);
       if (results.product == null) {
         const err = new Error("Product not found");
         err.status = 404;
         return next(err);
       }
+      // might not need this when updating
+      // await results.product.getUrl();
+
       for (const brand of results.brands) {
         if (brand._id.toString() === results.product.brand._id.toString()) {
           brand.selected = "selected";
@@ -356,18 +334,13 @@ exports.product_update_post = [
       _id: req.params.id,
     });
 
+    // await product.getUrl();
+
     await product.uploadImage(req.file);
-    // if (req.file) {
-    //   product.image_key = await cloudinary.uploader.upload(req.file.path)
-    //     .public_id;
-    // }
 
     if (!errors.isEmpty()) {
       await product.removeImage();
-      // if (product.image_key) {
-      //   cloudinary.uploader.destroy(product.image_key);
-      //   console.log("Deleted image " + product.image_key);
-      // }
+
       async.parallel(
         {
           brands(callback) {
