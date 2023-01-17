@@ -7,13 +7,14 @@ const ProductInstance = require("../models/productinstance");
 exports.productinstance_detail = (req, res, next) => {
   ProductInstance.findById(req.params.id)
     .populate("product")
-    .exec((err, productinstance) => {
+    .exec(async (err, productinstance) => {
       if (err) return next(err);
       if (productinstance == null) {
         const err = new Error("Product Instance not found");
         err.status = 404;
         return next(err);
       }
+      await productinstance.product.getUrl();
       res.render("productinstance_detail", {
         productinstance,
       });
@@ -23,15 +24,16 @@ exports.productinstance_detail = (req, res, next) => {
 exports.productinstance_create_get = (req, res, next) => {
   // Finds one or all products depending on where the user is coming from
   if (req.params.id !== "1") {
-    Product.findById(req.params.id)
-      .select("name")
-      .exec((err, result) => {
-        if (err) return next(err);
-        res.render("productinstance_form", {
-          title: "Create Product Instance",
-          product: result,
-        });
+    // make sure to predefine all product fields into form
+    // when coming from its detail page
+    Product.findById(req.params.id).exec(async (err, result) => {
+      if (err) return next(err);
+      await result.getUrl();
+      res.render("productinstance_form", {
+        title: "Create Product Instance",
+        product: result,
       });
+    });
   } else {
     Product.find()
       .select("name")
@@ -78,17 +80,17 @@ exports.productinstance_create_post = [
     if (!errors.isEmpty()) {
       // Checks if the user is coming from the product detail page
       if (req.params.id != "1") {
-        Product.findById(req.params.id)
-          .select("name")
-          .exec((err, result) => {
-            if (err) return next(err);
-            res.render("productinstance_form", {
-              title: "Create Product Instance",
-              product: result,
-              productinstance,
-              errors: errors.array(),
-            });
+        // make sure to
+        Product.findById(req.params.id).exec(async (err, result) => {
+          if (err) return next(err);
+          await result.getUrl();
+          res.render("productinstance_form", {
+            title: "Create Product Instance",
+            product: result,
+            productinstance,
+            errors: errors.array(),
           });
+        });
       } else {
         Product.find()
           .select("name")

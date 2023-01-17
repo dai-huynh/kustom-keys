@@ -23,11 +23,11 @@ const app = express();
 
 // view engine setup
 app.set("views", [
-  path.join(__dirname, "views"),
-  path.join(__dirname, "views/brands/"),
-  path.join(__dirname, "views/categories/"),
-  path.join(__dirname, "views/products/"),
-  path.join(__dirname, "views/productinstances"),
+  path.join(__dirname, "src/views"),
+  path.join(__dirname, "src/views/brands/"),
+  path.join(__dirname, "src/views/categories/"),
+  path.join(__dirname, "src/views/products/"),
+  path.join(__dirname, "src/views/productinstances"),
 ]);
 app.set("view engine", "pug");
 
@@ -48,6 +48,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "/public/")));
 app.use(express.static(path.join(__dirname, "/public/uploads")));
+app.use(express.static(path.join(__dirname, "/public/images")));
 app.use("/", indexRouter);
 
 // catch 404 and forward to error handler

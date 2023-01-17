@@ -20,14 +20,18 @@ exports.index = (req, res) => {
       if (err) return next(err);
 
       // maybe nesting async/await functions is bad practice?
-      // causes load time to dramatically increase
+      // unless importing modules that iterate over each product
+      // is causing this, don't really know what is causing this
+      // load time to dramatically increase
       // refactor later
+      // using regular loops decreases time significantly
+
       for (const product of products) {
         await product.getUrl();
       }
 
       res.render("index", {
-        title: "Kustom Keys",
+        title: "kustom keys",
         error: err,
         products,
       });
@@ -42,7 +46,7 @@ exports.product_list = (req, res, next) => {
       if (err) return next(err);
 
       for (const product of list_products) {
-        await product.getUrl();
+        if (product.image_key) await product.getUrl();
       }
 
       res.render("product_list", {
@@ -276,8 +280,6 @@ exports.product_update_get = (req, res, next) => {
         err.status = 404;
         return next(err);
       }
-      // might not need this when updating
-      // await results.product.getUrl();
 
       for (const brand of results.brands) {
         if (brand._id.toString() === results.product.brand._id.toString()) {

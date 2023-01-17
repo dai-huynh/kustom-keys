@@ -21,36 +21,32 @@ ProductSchema.virtual("url").get(function () {
 });
 
 ProductSchema.methods.getUrl = async function () {
-  if (this.image_key) {
-    await cloudinary.api.resource(this.image_key, (err, result) => {
-      if (err) return next(err);
-
-      this.image = result.url;
-    });
-  }
+  if (!this.image_key) return;
+  await cloudinary.api.resource(this.image_key, (err, result) => {
+    if (err) return next(err);
+    this.image = result.url;
+  });
 };
 
 ProductSchema.methods.uploadImage = async function (imageFile) {
-  if (imageFile) {
-    await cloudinary.uploader.upload(
-      imageFile.path,
-      { transformation: [{ width: 300, height: 200, crop: "fill" }] },
-      (err, result) => {
-        if (err) return next(err);
-        this.image_key = result.public_id;
-        console.log("Uploaded image " + this.image_key);
-      }
-    );
-  }
+  if (!imageFile) return;
+  await cloudinary.uploader.upload(
+    imageFile.path,
+    { transformation: [{ width: 300, height: 200, crop: "fill" }] },
+    (err, result) => {
+      if (err) return next(err);
+      this.image_key = result.public_id;
+      console.log("Uploaded image " + this.image_key);
+    }
+  );
 };
 
 ProductSchema.methods.removeImage = async function () {
-  if (this.image_key) {
-    cloudinary.uploader.destroy(this.image_key, (err) => {
-      if (err) return next(err);
-      console.log("Deleted image " + this.image_key);
-    });
-  }
+  if (!this.image_key) return;
+  cloudinary.uploader.destroy(this.image_key, (err) => {
+    if (err) return next(err);
+    console.log("Deleted image " + this.image_key);
+  });
 };
 
 module.exports = mongoose.model("Product", ProductSchema);

@@ -1,0 +1,22 @@
+doctype html
+html
+  head
+    title= title
+    link(rel="stylesheet", href="/stylesheets/style.css")
+  body.font-comfortaa
+    nav.fixed-top.justify-between.text-center.h-16.px-6.border-b-4.border-black(
+      class="md:flex lg:"
+    )
+      a.flex.items-center(href="/", class="w-1/3")
+        img.w-12.h-8(src="/images/noun-tetris.svg")
+        img.w-48.h-8(src="/images/kustom-keys.svg")
+      .flex.justify-self-center(class="w-1/4")
+        a.flex.justify-center.items-center.w-full(href="/products") Products
+        a.flex.justify-center.items-center.w-full(href="/brands") Brands
+        a.flex.justify-center.items-center.w-full(href="/categories") Categories
+        a.flex.justify-center.items-center.w-full(href="/") Contact
+      .flex.justify-end(class="w-1/3")
+        .flex(class="w-1/3")
+          a.flex.justify-center.items-center.w-full(href="/") Login
+          a.flex.justify-center.items-center.w-full(href="/") Sign Up
+    block content
