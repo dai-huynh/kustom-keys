@@ -7,7 +7,9 @@ block content
   )
     h2 Newest Arrival
     a(href=product.url) #{ product.name } #{ product.price_formatted }
-      img(crossorigin="anonymous", src=product.image)
-
+      if (product.image)
+        img(crossorigin="anonymous", src=product.image)
+      else
+        p No Image
   a(href="/product/create")
     button Create Product

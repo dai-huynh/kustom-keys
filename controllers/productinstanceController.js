@@ -80,7 +80,6 @@ exports.productinstance_create_post = [
     if (!errors.isEmpty()) {
       // Checks if the user is coming from the product detail page
       if (req.params.id != "1") {
-        // make sure to
         Product.findById(req.params.id).exec(async (err, result) => {
           if (err) return next(err);
           await result.getUrl();

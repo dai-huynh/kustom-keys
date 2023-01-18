@@ -13,45 +13,13 @@ const Brand = require("../models/brand");
 const Category = require("../models/category");
 
 exports.index = (req, res) => {
-  Product.findOne({ name: "Paeron" }, async (err, product) => {
-    if (err) return next(err);
-    await product.getUrl();
-    res.render("index", { title: "Home", product: product });
-  });
-  // async.parallel(
-  //   {
-  //     newest_products(callback) {
-  //       Product.find()
-  //         .select("name category price image_key")
-  //         .sort({ createdAt: "desc" })
-  //         .limit(6)
-  //         .exec(callback);
-  //     },
-  //     best_selling_products(callback) {
-  //       Product.find()
-  //         .select("name category price image_key")
-  //         .sort({ price: "desc" })
-  //         .limit(6)
-  //         .exec(callback);
-  //     },
-  //   },
-  //   async (err, results) => {
-  //     if (err) return next(err);
-
-  //     for (const product of results.newest_products) {
-  //       if (product.image_key) await product.getUrl();
-  //     }
-  //     for (const product of results.best_selling_products) {
-  //       if (product.image_key) await product.getUrl();
-  //     }
-
-  //     res.render("index", {
-  //       title: "Home",
-  //       newest_products: results.newest_products,
-  //       best_selling_products: results.best_selling_products,
-  //     });
-  //   }
-  // );
+  Product.findOne()
+    .sort({ price: "desc" })
+    .exec(async (err, product) => {
+      if (err) return next(err);
+      await product.getUrl();
+      res.render("index", { title: "Home", product: product });
+    });
 };
 
 exports.product_list = (req, res, next) => {
