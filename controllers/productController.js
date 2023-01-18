@@ -16,8 +16,9 @@ exports.index = (req, res) => {
   Product.findOne()
     .sort({ price: "desc" })
     .exec(async (err, product) => {
+      if (!product) return;
       if (err) return next(err);
-      await product.getUrl();
+      if (product.image_key) await product.getUrl();
       res.render("index", { title: "Home", product: product });
     });
 };
