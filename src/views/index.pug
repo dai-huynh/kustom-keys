@@ -2,34 +2,12 @@ extends layout
 
 block content
   p= title
-  h2 Newest Arrivals
-  ul
-    each product in products
-      li
-        a(href=product.url) #{ product.name }
-        | #{ product.price_formatted }
-        if (product.image_key)
-          img(crossorigin="anonymous", src=product.image)
-
-  //- h1 Keyboards
-  //- each product in products
-  //-   //- Prevents undefined
-  //-   if (product.category != null)
-  //-     if (product.category.name == "Keyboards")
-  //-       li
-  //-         a(href=product.url) #{ product.name }
-  //- h1 Keycaps
-  //- each product in products
-  //-   if (product.category != null)
-  //-     if (product.category.name == "Keycaps")
-  //-       li
-  //-         a(href=product.url) #{ product.name }
-  //- h1 Switches
-  //- each product in products
-  //-   if (product.category != null)
-  //-     if (product.category.name == "Switches")
-  //-       li
-  //-         a(href=product.url) #{ product.name }
+  .flex.flex-col.items-center.justify-evenly.w-full.p-6.bg-gray-200.space-y-4(
+    class="sm:flex-row"
+  )
+    h2 Newest Arrival
+    a(href=product.url) #{ product.name } #{ product.price_formatted }
+      img(crossorigin="anonymous", src=product.image)
 
   a(href="/product/create")
     button Create Product

@@ -3,9 +3,9 @@ module.exports = {
   content: ["./src/**/*.{pug, html}"],
   theme: {
     screens: {
-      sm: "480px",
-      md: "900px",
-      lg: "976px",
+      sm: "640px",
+      md: "880px",
+      lg: "1024px",
       xl: "1440px",
     },
     fontFamily: {

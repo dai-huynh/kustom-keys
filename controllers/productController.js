@@ -13,29 +13,45 @@ const Brand = require("../models/brand");
 const Category = require("../models/category");
 
 exports.index = (req, res) => {
-  Product.find()
-    .select("name category price image_key")
-    .populate("category")
-    .exec(async (err, products) => {
-      if (err) return next(err);
+  Product.findOne({ name: "Paeron" }, async (err, product) => {
+    if (err) return next(err);
+    await product.getUrl();
+    res.render("index", { title: "Home", product: product });
+  });
+  // async.parallel(
+  //   {
+  //     newest_products(callback) {
+  //       Product.find()
+  //         .select("name category price image_key")
+  //         .sort({ createdAt: "desc" })
+  //         .limit(6)
+  //         .exec(callback);
+  //     },
+  //     best_selling_products(callback) {
+  //       Product.find()
+  //         .select("name category price image_key")
+  //         .sort({ price: "desc" })
+  //         .limit(6)
+  //         .exec(callback);
+  //     },
+  //   },
+  //   async (err, results) => {
+  //     if (err) return next(err);
 
-      // maybe nesting async/await functions is bad practice?
-      // unless importing modules that iterate over each product
-      // is causing this, don't really know what is causing this
-      // load time to dramatically increase
-      // refactor later
-      // using regular loops decreases time significantly
+  //     for (const product of results.newest_products) {
+  //       if (product.image_key) await product.getUrl();
+  //     }
+  //     for (const product of results.best_selling_products) {
+  //       if (product.image_key) await product.getUrl();
+  //     }
 
-      for (const product of products) {
-        await product.getUrl();
-      }
-
-      res.render("index", {
-        title: "kustom keys",
-        error: err,
-        products,
-      });
-    });
+  //     res.render("index", {
+  //       title: "Home",
+  //       newest_products: results.newest_products,
+  //       best_selling_products: results.best_selling_products,
+  //     });
+  //   }
+  // );
 };
 
 exports.product_list = (req, res, next) => {
