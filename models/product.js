@@ -32,7 +32,7 @@ ProductSchema.methods.uploadImage = async function (imageFile) {
   if (!imageFile) return;
   await cloudinary.uploader.upload(
     imageFile.path,
-    { transformation: [{ width: 300, height: 200, crop: "fill" }] },
+    { transformation: [{ width: 400, height: 400, crop: "fill" }] },
     (err, result) => {
       if (err) return next(err);
       this.image_key = result.public_id;

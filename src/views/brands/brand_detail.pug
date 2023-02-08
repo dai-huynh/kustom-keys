@@ -5,14 +5,11 @@ block content
 
   if (brand_products.length)
     h2 Products:
-
-    ul
       each product in brand_products
-        li
-          h4
-            a(href=product.url) #{ product.name }: #{ product.price }
-            if (product.image_key)
-              img(crossorigin="anonymous", src=product.image)
+        .font-bold
+          a(href=product.url) #{ product.name }: #{ product.price }
+          if (product.image_key)
+            img(crossorigin="anonymous", src=product.image)
 
     p No products
 

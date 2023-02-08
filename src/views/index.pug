@@ -1,15 +1,20 @@
 extends layout
 
 block content
-  p= title
-  .flex.flex-col.items-center.justify-evenly.w-full.p-6.bg-gray-200.space-y-4(
-    class="sm:flex-row"
-  )
-    h2 Newest Arrival
-    a(href=product.url) #{ product.name } #{ product.price_formatted }
-      if (product.image)
-        img(crossorigin="anonymous", src=product.image)
-      else
-        p No Image
-  a(href="/product/create")
-    button Create Product
+  .page-container.flex.flex-col.gap-4
+    .flex.flex-col.items-center.justify-evenly.w-full.p-6.bg-neutral-100.space-y-4(
+      class="sm:flex-row"
+    )
+      .text-xl.font-bold Newest Arrival
+      .text-center
+        a.flex.flex-col.gap-4.text-lg.font-bold(href=product.url)
+          if (product.image)
+            img.rounded(crossorigin="anonymous", src=product.image)
+          else
+            p No Image
+          | #{ product.name }
+        div From #{ product.price_formatted }
+
+    .flex.flex-col.items-center.justify-evenly.w-full.p-6.bg-neutral-100.space-y-4(
+      class="sm:flex-row"
+    )

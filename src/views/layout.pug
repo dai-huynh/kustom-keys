@@ -3,9 +3,9 @@ html
   head
     title= title
     link(rel="stylesheet", href="/stylesheets/style.css")
-    script(defer, src="javascripts/hamburger.js")
+    script(defer, src="/javascripts/hamburger.js")
 
-  body.font-comfortaa
+  body
     nav.relative.p-6.border-b-4.border-black
       .flex.items-center.justify-between
         //- logo
@@ -38,3 +38,11 @@ html
         a(href="/", class="hover:text-neutral-600") Contact
 
     block content
+
+    //- universal buttons
+    .flex.flex-col.items-center.justify-center.p-6.gap-4.bg-neutral-200(
+      class="sm:flex-row sm:justify-evenly"
+    )
+      a(href="/product/create", class="hover:text-neutral-600") Create Product
+      a(href="/brand/create", class="hover:text-neutral-600") Create Brand
+      a(href="/category/create", class="hover:text-neutral-600") Create Category

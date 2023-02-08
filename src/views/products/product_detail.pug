@@ -1,43 +1,57 @@
 extends ../layout
-
+//- change the shit to be able to become a row with header and details on lg screens
 block content
-  h1 Product: #{ product.name }: #{ product.price }
-
-  if (product.image_key)
-    img(crossorigin="anonymous", src=product.image)
-
-  p By:
-    a(href=product.brand.url) #{ product.brand.name }
-  p Category:
-    if (!product.category)
-      p no category
-    else
-      a(href=product.category.url) #{ product.category.name }
-
-  p= product.details
-
-  ul
-    each instance in product_instances
-      li
-        h4
-          a(href=instance.url) #{ product.name }: #{ instance.condition }
-        p Model Number: #{ instance.model }
-
-        if (!instance.description)
-          p No Description
+  .flex.flex-col.space-y-6.p-6
+    div
+      //- Product Header
+      .flex.flex-col.items-center.space-y-4
+        .font-bold.text-2xl #{ product.name }
+        if (product.image_key)
+          img.border-2.border-black.rounded(
+            crossorigin="anonymous",
+            src=product.image
+          )
         else
-          p #{ instance.description }
+          .flex.items-center.justify-center.h-24.font-bold.text-xl(class="w-1/2") No Image Available
+        .font-bold.text-lg MSRP: #{ product.price_formatted }
 
-        a(href=instance.url)
-          button Buy Now
+      //- Product Details
+      .flex.flex-col.space-y-2.bg-neutral-200.rounded.p-6
+        if (product.category)
+          a(href=product.category.url) #{ product.category.name }
+        else
+          div No categories
+        div
+          a(href=product.brand.url) From: #{ product.brand.name }
+
+        div Description: #{ product.details }
+
+        .flex.justify-evenly
+          a(href=`/product/${product._id}/update`) Update Product
+          a(href=`/product/${product._id}/delete`) Delete Product
+
+    //- Product Stock 
+    .self-center.font-bold.text-2xl Stock
+    if (product_instances.length > 0)
+      ul.flex.flex-col.bg-neutral-200.rounded.px-6
+        each instance in product_instances
+          li.flex.flex-col.space-y-2.my-4
+            div Model No. #{ instance.model }
+
+            div Condition: #{ instance.condition }
+
+            div Price: #{ instance.price_formatted }
+
+            if (instance.description)
+              div Description: #{ instance.description }
+
+            a.self-center.text-center.w-full.border-b-2.border-black(
+              href=instance.url
+            ) Buy Now
+        a.self-center.p-2.rounded(
+          href=`/productinstance/${product._id}/create`
+        ) Create Product Instance
+
     else
-      p No Stock Available
-
-  a(href="/product/create")
-    button Create Product
-  a(href=product.url + "/delete")
-    button Delete
-  a(href=product.url + "/update")
-    button Update
-  a(href=`/productinstance/${product._id}/create`)
-    button Create Product Instance
+      .self-center.font-bold.text-xl No Stock Available
+      a.self-center(href=`/productinstance/${product._id}/create`) Create Product Instance

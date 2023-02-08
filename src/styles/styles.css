@@ -9,6 +9,15 @@ textarea {
   border: 2px solid black;
 }
 
+a:hover {
+  color: #525252;
+}
+
+.form-control {
+  width: 100%;
+  border-radius: 4px;
+}
+
 .hamburger {
   width: 24px;
   height: 24px;

@@ -14,7 +14,7 @@ const Category = require("../models/category");
 
 exports.index = (req, res) => {
   Product.findOne()
-    .sort({ price: "desc" })
+    .sort({ _id: "desc" })
     .exec(async (err, product) => {
       if (!product) return;
       if (err) return next(err);
@@ -281,6 +281,8 @@ exports.product_update_get = (req, res, next) => {
         }
       }
 
+      await results.product.removeImage(); // Remove old image regardless of whether new image is uploaded
+
       res.render("product_form", {
         title: "Update Product",
         product: results.product,
@@ -320,8 +322,6 @@ exports.product_update_post = [
       image_key: "",
       _id: req.params.id,
     });
-
-    // await product.getUrl();
 
     await product.uploadImage(req.file);
 

@@ -20,8 +20,8 @@ const ProductInstanceSchema = new Schema({
   description: { type: String },
 });
 
-ProductInstanceSchema.virtual("name").get(function () {
-  return this.product.name;
+ProductInstanceSchema.virtual("price_formatted").get(function () {
+  return "$" + this.price;
 });
 
 ProductInstanceSchema.virtual("url").get(function () {
